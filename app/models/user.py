@@ -11,8 +11,8 @@ if TYPE_CHECKING:
     from .todo import Todo  
 
 class UserRole(Enum):
-    user = "USER"
-    admin = "ADMIN"
+    user = "user"
+    admin = "admin"
 
 
 class User(Base):
