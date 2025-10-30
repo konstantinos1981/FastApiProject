@@ -1,0 +1,84 @@
+# =========================
+# FastAPI / Python Project
+# =========================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables
+.env
+.env.*
+!.env.example  # Keep example env files for documentation
+
+# Logs
+*.log
+*.out
+*.err
+
+# Coverage / testing
+.coverage
+htmlcov/
+.tox/
+.nox/
+pytest_cache/
+.cache/
+coverage.xml
+*.cover
+*.py,cover
+
+# Type checker / linter caches
+.mypy_cache/
+.pyre/
+.pytype/
+ruff_cache/
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# SQLite or other local DBs
+*.sqlite3
+*.db
+
+# Jupyter notebooks
+.ipynb_checkpoints
+
+# Editor / IDE folders
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+**/tmp/
+**/logs/
+
+# Static / Media (optional, if generated dynamically)
+staticfiles/
+media/
+uploads/
+
+# FastAPI auto-generated OpenAPI docs cache (if any)
+openapi.json
+
+# =========================
+# End of .gitignore
+# =========================
