@@ -20,7 +20,8 @@ user_create_example:Dict [str, Any] = {
     "last_name": "Doe",
     "email": "john.doe@example.com",
     "username": "johnDoe123",
-    "password": "Comp1exP@ssw0rd"
+    "password": "Comp1exP@ssw0rd",
+    "confirm_password": "Comp1exP@ssw0rd"
 }
 
 user_with_todos_example:Dict [str, Any] = {

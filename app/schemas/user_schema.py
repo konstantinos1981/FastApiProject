@@ -28,18 +28,27 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: Annotated[str, Field(min_length=8, max_length=16)]
+    confirm_password: Annotated[str, Field(min_length=8, max_length=16)]
+
+    @field_validator('confirm_password')
+    def passwords_match(cls, v, info):
+        if 'password' in info.data and v != info.data['password']:
+            raise ValueError("Passwords do not match.")
+        return v
 
     @field_validator('password')
     def validate_password_strength(cls, v):
-        # Fix: "[A-A]" should be "[A-Z]"
-        if not re.search(r"[A-Z]", v):
-            raise ValueError("Password must contain at least one uppercase letter.")
-        if not re.search(r"[0-9]", v):
-            raise ValueError("Password must contain at least one number.")
-        if not re.search(r"[a-z]", v):
-            raise ValueError("Password must contain at least one lowercase letter.")
-        if not re.search(r"[\W_]", v):  # special character or underscore
-            raise ValueError("Password must contain at least one symbol.")
+        rules = [
+            (r'.{8,16}', 'Password must be between 8 and 16 characters long.'),
+            (r'[A-Z]', 'Password must contain at least one uppercase letter.'),
+            (r'[a-z]', 'Password must contain at least one lowercase letter.'),
+            (r'[0-9]', 'Password must contain at least one digit.'),
+            (r'[!@#$%^&*(),.?":{}|<>]', 'Password must contain at least one special character.')
+        ]
+
+        errors = [msg for pattern, msg in rules if not re.search(pattern, v)]
+        if errors:
+            raise ValueError("\n".join(errors))
         return v
     
     model_config = ConfigDict(
