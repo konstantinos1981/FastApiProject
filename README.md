@@ -7,143 +7,135 @@ A modern REST API built with FastAPI, SQLAlchemy, and Python that manages users 
 - User authentication and authorization with JWT tokens
 - Role-based access control (User/Admin roles)
 - Todo management system
+- Refresh token support with secure cookies
 - RESTful API endpoints
 - SQLAlchemy ORM integration
 - Environment-based configuration
-- Refresh token support with secure cookies
 
 ## Tech Stack
 
 - FastAPI
 - SQLAlchemy
-- Pydantic
-- Python 3.x
-- SQLite (Database)
+- Pydantic (v2)
+- Python 3.11+
+- SQLite (local development)
 - JWT Authentication
 - BCrypt password hashing
 
-## Project Structure
+## Project structure
 
 ```
 fast_api/
 ├── app/
 │   ├── api/
 │   │   └── v1/
-│   │       ├── auth_router.py    # Authentication endpoints
-│   │       ├── dependancies.py   # FastAPI dependencies
-│   │       └── jwt_handler.py    # JWT token management
+│   │       ├── admin_router.py      # Admin endpoints
+│   │       ├── auth_router.py       # Authentication endpoints
+│   │       ├── dependancies.py      # FastAPI dependencies (db, get_current_user, ...)
+│   │       └── jwt_handler.py       # JWT helpers
 │   ├── core/
-│   │   ├── __init__.py
-│   │   └── config.py            # Settings management
+│   │   └── config.py                # Settings management
 │   ├── db/
-│   │   ├── __init__.py
-│   │   └── database.py          # Database configuration
+│   │   └── database.py              # Database engine / session
 │   ├── models/
-│   │   ├── __init__.py
-│   │   ├── user.py             # User model
-│   │   └── todo.py             # Todo model
+│   │   ├── user.py                  # SQLAlchemy User model (includes UserRole enum)
+│   │   └── todo.py                  # SQLAlchemy Todo model
 │   ├── schemas/
-│   │   ├── __init__.py
-│   │   ├── user_schema.py      # User Pydantic models
-│   │   ├── todo_schema.py      # Todo Pydantic models
-│   │   └── examples/           # Schema examples
-│   └── example.env             # Environment template
-├── main.py                     # Application entry point
-├── check_settings.py           # Settings verification
-├── .env                        # Environment variables
-├── requirements.txt            # Project dependencies
-└── README.md                   # This file
+│   │   ├── user_schema.py           # Pydantic user schemas (UserRead, UserCreate, ...)
+│   │   └── todo_schema.py           # Pydantic todo schemas
+│   └── example.env                  # Example environment variables
+├── main.py                          # App entrypoint
+├── check_settings.py                # Helper to verify settings load
+├── .env                             # Local environment variables (not committed)
+├── requirements.txt                 # Python dependencies
+└── README.md
 ```
 
-## Getting Started
+## Getting started (local)
 
-1. Clone the repository:
+1. Clone the repository
 
 ```bash
 git clone https://github.com/konstantinos1981/FastApiProject
 cd fast_api
 ```
 
-2. Create and activate a virtual environment:
+2. Create and activate a virtual environment
 
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Linux/Mac
+python -m venv .venv
+source .venv/bin/activate
 ```
 
-3. Install dependencies:
+3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Set up your environment variables:
-   - Copy `app/example.env` to `.env` in the root directory
-   - Update the values in `.env`:
+4. Create your .env
 
-```env
-PROJECT_NAME="Todo API"
-DATABASE_URL="sqlite:///./data.db"
-SECRET_KEY="your-secure-secret-key"
-ALGORITHM="HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES=15
-REFRESH_SECRET_KEY="your-secure-refresh-key"
+```bash
+cp app/example.env .env
+# Edit .env and set values (DATABASE_URL, SECRET_KEY, REFRESH_SECRET_KEY, etc.)
 ```
 
-5. Verify settings:
+Example .env values (example.env shipped with the repo):
+
+```
+PROJECT_NAME="Todo API"
+DATABASE_URL="sqlite:///./data.db"
+SECRET_KEY="your-secret-key"
+ALGORITHM="HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES=15
+REFRESH_SECRET_KEY="your-refresh-secret-key"
+```
+
+5. Verify settings load
 
 ```bash
 python check_settings.py
 ```
 
-6. Run the application:
+6. Run the app
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-## API Documentation
+Open API docs:
 
-Once the application is running, you can access:
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
 
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
+## Important endpoints
 
-## API Endpoints
+Authentication:
 
-### Authentication
+- POST /auth/signup — register user
+- POST /auth/admin_signup — register admin
+- POST /auth/token — obtain access token
+- POST /auth/refresh — refresh access token (secure cookie)
+- POST /auth/logout — clear refresh token
 
-- `POST /auth/signup` - Register new user
-- `POST /auth/admin_signup` - Register new admin
-- `POST /auth/token` - Login and get access token
-- `POST /auth/refresh` - Refresh access token
-- `POST /auth/logout` - Logout and clear refresh token
+Admin (example):
 
-### Users
+- GET /admin/ — admin root (returns current admin user)
+- GET /admin/users — list users (admin only)
+- GET /admin/users/{username} — fetch user by username (admin only)
+- GET /admin/users/user_email/{email} — fetch user by email (admin only)
 
-- `GET /auth/users` - List all users (admin only)
-- `GET /auth/users/info` - Get current user info
-- `GET /auth/users/{username}` - Get user by username (admin only)
-- `GET /auth/users/user_email/{email}` - Get user by email (admin only)
+Notes:
 
-## Models
+- The API returns Pydantic response models (UserRead, TodoRead) that omit sensitive fields (e.g. hashed_password).
+- Ensure tokens you use belong to users with the required role for protected endpoints.
 
-### User Model
+## Contributing
 
-- UUID-based primary key
-- Role-based access (user/admin)
-- Timestamp tracking (created_at, updated_at)
-- Secure password hashing
-- Email and username uniqueness
-- One-to-many relationship with todos
-
-### Todo Model
-
-- UUID-based primary key
-- Title and description fields
-- Completion status tracking
-- Timestamp tracking
-- Many-to-one relationship with users
+1. Fork the repo
+2. Create a branch: git checkout -b feature/your-feature
+3. Commit: git commit -m "feat: short description"
+4. Push and open a PR
 
 ## License
 
@@ -168,11 +160,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request

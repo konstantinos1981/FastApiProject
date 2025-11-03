@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session
 from app.db.database import SessionLocal
 from typing import Annotated
 
+from app.schemas.user_schema import UserRead
+
 def get_db():
     db =SessionLocal()
     try:
@@ -50,4 +52,4 @@ def get_current_user(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
-    return user
+    return UserRead.model_validate(user)  # <-- convert ORM -> Pydantic (UserRead must NOT include hashed_password)

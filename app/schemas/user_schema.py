@@ -5,6 +5,7 @@ import re
 from .examples import *
 from uuid import UUID
 from .todo_schema import TodoRead
+from app.models.user import UserRole
 
 
 # -----------------------
@@ -15,6 +16,7 @@ class UserBase(BaseModel):
     last_name: Annotated[str, Field(min_length=2)]
     email: EmailStr
     username: Annotated[str, Field(min_length=8, pattern=r"^[A-Za-z0-9_]+$")]
+    role: UserRole
 
     @field_validator('email')
     def normalize_email(cls, v):
@@ -74,13 +76,8 @@ class UserUpdate(BaseModel):
         return v
 
 
-class UserRead(BaseModel):
+class UserRead(UserBase):
     id: UUID
-    first_name: str
-    last_name: Optional[str]
-    email: EmailStr
-    username: str
-    is_active: bool
     created_at: datetime
     updated_at: Optional[datetime]
 

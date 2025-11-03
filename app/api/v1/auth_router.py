@@ -5,6 +5,8 @@ from app.models import User , UserRole
 from starlette import status
 from passlib.context import CryptContext
 from pydantic import EmailStr
+
+from app.schemas.user_schema import UserRead
 from .jwt_handler import create_access_token, create_refresh_token, verify_token
 from .dependancies import db_dependancy , get_current_user
 
@@ -26,6 +28,7 @@ async def signup(user_create:UserCreate, db:db_dependancy):
 
     db.add(user_model)
     db.commit()
+    return {"message": f"User {user_model.username} created successfully"}
 
 @router.post("/admin_signup", status_code=status.HTTP_201_CREATED)
 async def admin_signup(user_create:UserCreate, db:db_dependancy):
@@ -41,32 +44,12 @@ async def admin_signup(user_create:UserCreate, db:db_dependancy):
     db.add(user_model)
     db.commit()
 
-@router.get("/users", status_code=status.HTTP_200_OK)
-async def get_users(db:db_dependancy, current_user: User = Depends(get_current_user)):
-    if current_user.role == UserRole.admin:
-        users = db.query(User).all()
-        return users
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
-@router.get("/users/info", status_code=status.HTTP_200_OK)
-async def get_users_by_username(db:db_dependancy, current_user: User = Depends(get_current_user)):
+
+@router.get("/user", status_code=status.HTTP_200_OK)
+async def get_user(db:db_dependancy, current_user: User = Depends(get_current_user)):
     user = db.query(User).filter(User.username == current_user.username).first()
-    return user
-
-@router.get("/users/{username}", status_code=status.HTTP_200_OK)
-async def admin_get_users_by_username( username:str, db:db_dependancy, current_user: User = Depends(get_current_user)):
-    if current_user.role == UserRole.admin:
-        user = db.query(User).filter(User.username == username).first()
-        return user
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
-
-@router.get("/users/user_email/{email}")
-async def admin_get_users_by_email(email:EmailStr, db:db_dependancy, current_user: User = Depends(get_current_user)):
-    if current_user.role == UserRole.admin:
-        user = db.query(User).filter(User.email == email).first()
-        return user
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
-
+    return UserRead.model_validate(user)
 
 @router.post("/token")
 async def login( db:db_dependancy,  response:Response, form_data:OAuth2PasswordRequestForm = Depends()):
