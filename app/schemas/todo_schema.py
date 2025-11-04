@@ -29,7 +29,7 @@ class TodoUpdate(BaseModel):
 class TodoRead(TodoBase):
     """Schema for reading todo data."""
     id: UUID
-    owner_id: int
+    owner_id: UUID
     is_completed: bool
     created_at: datetime
     updated_at: Optional[datetime]

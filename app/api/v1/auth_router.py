@@ -23,7 +23,8 @@ async def signup(user_create:UserCreate, db:db_dependancy):
         last_name = user_create.last_name,
         username = user_create.username,
         email = user_create.email,
-        hashed_password = bcrypt_context.hash(user_create.password)     
+        hashed_password = bcrypt_context.hash(user_create.password) 
+  
     )
 
     db.add(user_model)

@@ -16,7 +16,7 @@ class UserBase(BaseModel):
     last_name: Annotated[str, Field(min_length=2)]
     email: EmailStr
     username: Annotated[str, Field(min_length=8, pattern=r"^[A-Za-z0-9_]+$")]
-    role: UserRole
+    role: UserRole = UserRole.user
 
     @field_validator('email')
     def normalize_email(cls, v):
