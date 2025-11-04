@@ -11,3 +11,8 @@ todo_read_example:Dict [str, Any] = {
     "created_at": "2025-10-23T18:00:00",
     "updated_at": "2025-10-24T10:00:00"
 }
+
+todo_create_example:Dict [str, Any] = {
+    "title": "Buy groceries",
+    "description": "Milk, Eggs, Bread"
+}

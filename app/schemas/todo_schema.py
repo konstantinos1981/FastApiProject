@@ -16,7 +16,12 @@ class TodoBase(BaseModel):
 
 class TodoCreate(TodoBase):
     """Schema for creating a new todo."""
-    pass
+    model_config = {
+        "from_attributes": True,
+        "json_schema_extra": {
+            "example": todo_create_example
+        }
+    }
 
 
 class TodoUpdate(BaseModel):
