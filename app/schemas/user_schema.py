@@ -1,11 +1,12 @@
 from datetime import datetime
 from typing import Optional, List, Annotated
 from pydantic import BaseModel, Field, EmailStr, field_validator, ConfigDict
-import re
 from .examples import *
+from app.core.validators import *
 from uuid import UUID
 from .todo_schema import TodoRead
 from app.models.user import UserRole
+
 
 
 # -----------------------
@@ -20,45 +21,37 @@ class UserBase(BaseModel):
 
     @field_validator('email')
     def normalize_email(cls, v):
-        return v.strip().lower()
+        return normalize_email_field(v)
 
 
     @field_validator('first_name', 'last_name')
     def capitalize_names(cls, v):
-        return v.strip().title()
+        return capitalize_name_fields(v)
+    
+    @field_validator('username')
+    def validate_username(cls, v):
+        return validate_username_field(v)
 
 
 class UserCreate(UserBase):
     password: Annotated[str, Field(min_length=8, max_length=16)]
     confirm_password: Annotated[str, Field(min_length=8, max_length=16)]
 
-    @field_validator('confirm_password')
-    def passwords_match(cls, v, info):
-        if 'password' in info.data and v != info.data['password']:
-            raise ValueError("Passwords do not match.")
-        return v
-
-    @field_validator('password')
-    def validate_password_strength(cls, v):
-        rules = [
-            (r'.{8,16}', 'Password must be between 8 and 16 characters long.'),
-            (r'[A-Z]', 'Password must contain at least one uppercase letter.'),
-            (r'[a-z]', 'Password must contain at least one lowercase letter.'),
-            (r'[0-9]', 'Password must contain at least one digit.'),
-            (r'[!@#$%^&*(),.?":{}|<>]', 'Password must contain at least one special character.')
-        ]
-
-        errors = [msg for pattern, msg in rules if not re.search(pattern, v)]
-        if errors:
-            raise ValueError("\n".join(errors))
-        return v
-    
     model_config = ConfigDict(
         from_attributes=True,
         json_schema_extra= {
             "example": user_create_example
         }
-)
+    )
+
+    @field_validator('confirm_password')
+    def passwords_match(cls, v, info):
+        return confirm_field_match(v, info.data, 'password', "Passwords do not match.")
+
+    @field_validator('password')
+    def validate_password_strength(cls, v):
+        return validate_password_field(v)
+
 
 
 class UserUpdate(BaseModel):
@@ -67,13 +60,30 @@ class UserUpdate(BaseModel):
     last_name: Optional[str] = Field(None, min_length=2)
     username: Optional[str] = Field(None, min_length=8, pattern=r"^[A-Za-z0-9_]+$")
     email: Optional[EmailStr] = None
-    is_active: Optional[bool] = None
+
+    model_config = ConfigDict(
+       from_attributes=True,
+        json_schema_extra= {
+            "example": user_update_example
+        }
+    )
+
+
+    @field_validator('email')
+    def normalize_email(cls, v):
+        return normalize_email_field(v)
+
+    @field_validator('username')
+    def validate_username(cls, v):
+        return validate_username_field(v)
 
     @field_validator('first_name', 'last_name', mode='before')
     def capitalize_names(cls, v):
         if v:
-            return v.strip().title()
+            return capitalize_name_fields(v)
         return v
+    
+    
 
 
 class UserRead(UserBase):
@@ -81,13 +91,36 @@ class UserRead(UserBase):
     created_at: datetime
     updated_at: Optional[datetime]
 
-    model_config = {
+    model_config = ConfigDict({
         "from_attributes": True,  # allows ORM mode
         "json_schema_extra": {
             "example": user_read_example
         }
     }
+    )
 
+
+class UserPasswordUpdate(BaseModel):
+    """Schema for updating user password."""
+    old_password: Annotated[str, Field(min_length=8, max_length=16)]
+    new_password: Annotated[str, Field(min_length=8, max_length=16)]
+    confirm_password: Annotated[str, Field(min_length=8, max_length=16)]
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra= {
+            "example": user_password_change_example
+        }
+    )
+
+    @field_validator('confirm_password')
+    def passwords_match(cls, v, info):
+        return confirm_field_match(v, info.data, 'new_password', "Passwords do not match.")
+
+    @field_validator('new_password')
+    def validate_password_strength(cls, v):
+        return validate_password_field(v)
+    
+    
 
 # -----------------------
 # Nested relationship schemas
@@ -96,10 +129,11 @@ class UserWithTodos(UserRead):
     """Schema for reading a user with their todos."""
     todos: List[TodoRead] = []
     
-    model_config = {
+    model_config = ConfigDict({
         "from_attributes": True,
         "json_schema_extra": {
             "example": user_with_todos_example
         }
     }
+    )
 

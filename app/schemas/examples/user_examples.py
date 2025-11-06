@@ -24,6 +24,13 @@ user_create_example:Dict [str, Any] = {
     "confirm_password": "Comp1exP@ssw0rd"
 }
 
+user_update_example:Dict [str, Any] = {
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "john.doe@example.com",
+    "username": "johnDoe123"
+}
+
 user_with_todos_example:Dict [str, Any] = {
     **user_read_example,
     "todos": [
@@ -46,4 +53,10 @@ user_with_todos_example:Dict [str, Any] = {
             "updated_at": "2025-10-24T10:00:00"
         }
     ]
+}
+
+user_password_change_example:Dict [str, Any] = {
+    "old_password": "OldP@ssw0rd",
+    "new_password": "NewC0mpl3xP@ssw0rd",
+    "confirm_password": "NewC0mpl3xP@ssw0rd"
 }

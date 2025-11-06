@@ -1,2 +1,2 @@
-from .user_examples import user_read_example, user_with_todos_example, user_create_example
+from .user_examples import user_read_example, user_with_todos_example, user_create_example, user_update_example, user_password_change_example
 from .todo_examples import todo_read_example, todo_create_example

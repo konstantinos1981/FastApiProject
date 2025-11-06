@@ -14,43 +14,10 @@ from .dependancies import db_dependancy , get_current_user
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated ='auto')
 
 
-router = APIRouter(prefix="/auth")
-
-@router.post("/signup", status_code=status.HTTP_201_CREATED)
-async def signup(user_create:UserCreate, db:db_dependancy):
-    user_model = User(
-        first_name = user_create.first_name,
-        last_name = user_create.last_name,
-        username = user_create.username,
-        email = user_create.email,
-        hashed_password = bcrypt_context.hash(user_create.password) 
-  
-    )
-
-    db.add(user_model)
-    db.commit()
-    return {"message": f"User {user_model.username} created successfully"}
-
-@router.post("/admin_signup", status_code=status.HTTP_201_CREATED)
-async def admin_signup(user_create:UserCreate, db:db_dependancy):
-    user_model = User(
-        first_name = user_create.first_name,
-        last_name = user_create.last_name,
-        username = user_create.username,
-        email = user_create.email,
-        hashed_password = bcrypt_context.hash(user_create.password),     
-        role = UserRole.admin
-    )
-
-    db.add(user_model)
-    db.commit()
+router = APIRouter(prefix="/auth" , tags=["Authentication"])
 
 
 
-@router.get("/user", status_code=status.HTTP_200_OK)
-async def get_user(db:db_dependancy, current_user: User = Depends(get_current_user)):
-    user = db.query(User).filter(User.username == current_user.username).first()
-    return UserRead.model_validate(user)
 
 @router.post("/token")
 async def login( db:db_dependancy,  response:Response, form_data:OAuth2PasswordRequestForm = Depends()):
@@ -100,8 +67,3 @@ async def refresh_access_token(
         "access_token": new_access_token,
         "token_type": "bearer"
     }
-
-@router.post("/logout", status_code=status.HTTP_200_OK)
-async def logout(response: Response):
-    response.delete_cookie("refresh_token")
-    return {"message": "Successfully logged out"}
