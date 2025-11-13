@@ -26,3 +26,13 @@ async def create_todo(todo:TodoCreate, db:db_dependancy, user:UserRead=Depends(g
     db.commit()
     db.refresh(todo_model)
     return todo_model
+
+@router.put("/{todo_id}/complete", response_model=TodoRead)
+async def complete_todo(todo_id:str, db:db_dependancy, user:UserRead=Depends(get_current_user)):
+    todo_model = db.query(Todo).filter(Todo.id == todo_id, Todo.owner_id == str(user.id)).first()
+    if not todo_model:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Todo not found")
+    todo_model.is_completed = True
+    db.commit()
+    db.refresh(todo_model)
+    return todo_model

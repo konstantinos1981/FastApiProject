@@ -48,14 +48,19 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = db.query(User).filter(User.id == user_id).first()
-    if user is None:
+    current_user = db.query(User).filter(User.id == user_id).first()
+    if current_user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
+    if not current_user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Inactive user.",
+        )
 
     return UserRead.model_validate(
-        user
+        current_user
     )  # <-- convert ORM -> Pydantic (UserRead must NOT include hashed_password)
 
 
@@ -72,3 +77,5 @@ def is_admin(
             detail="You do not have permission to perform this action.",
         )
     return current_user
+
+
