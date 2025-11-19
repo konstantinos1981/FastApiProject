@@ -31,8 +31,8 @@ async def login(
     ):
         raise HTTPException(status_code=401, detail="Invalid Credentials")
 
-    access_token = create_access_token(data={"sub": user.id})
-    refresh_token = create_refresh_token(data={"sub": user.id})
+    access_token = create_access_token(data={"sub": user.id,"org": user.organization_id, "role":user.role.value})
+    refresh_token = create_refresh_token(data={"sub": user.id, "org": user.organization_id, "role": user.role.value})
 
     response.set_cookie(
         key="refresh_token",
@@ -62,6 +62,6 @@ async def refresh_access_token(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    new_access_token = create_access_token(data={"sub": user.id})
+    new_access_token = create_access_token(data={"sub": user.id, "org": user.organization_id, "role": user.role.value})
 
     return {"access_token": new_access_token, "token_type": "bearer"}

@@ -64,18 +64,31 @@ def get_current_user(
     )  # <-- convert ORM -> Pydantic (UserRead must NOT include hashed_password)
 
 
-def is_admin(
-    current_user: Annotated[UserRead, Depends(get_current_user)],
-) -> UserRead:
+def is_admin(db: db_dependancy, token: str = Depends(oauth2_scheme)):
     """
-    Dependency that ensures the user is an admin.
-    Raises 403 if not.
+    Dependency that verifies the JWT contains an admin role and returns the user.
     """
-    if not current_user.role == UserRole.admin:
+    try:
+        payload = verify_token(token)
+        if not payload:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        role = payload.get("role")
+        if role != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to perform this action.",
+            )
+
+        return payload
+
+    except JWTError:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to perform this action.",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
         )
-    return current_user
-
-

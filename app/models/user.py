@@ -37,10 +37,14 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     updated_at: Mapped[datetime | None] = mapped_column(DateTime, onupdate=datetime.now)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    role: Mapped[str] = mapped_column(SqlEnum(UserRole), default=UserRole.user)
+    role: Mapped[UserRole] = mapped_column(SqlEnum(UserRole), default=UserRole.user)
 
-    organization_id: Mapped[str] = mapped_column(String(36), ForeignKey("organizations.org_id"))
-    organization: Mapped["Organization"] = relationship("Organization", back_populates="users")
+    organization_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("organizations.org_id"), nullable=True
+    )
+    organization: Mapped["Organization | None"] = relationship(
+        "Organization", back_populates="users"
+    )
 
     todos: Mapped[List["Todo"]] = relationship(
         "Todo", back_populates="owner", cascade="all, delete-orphan"
