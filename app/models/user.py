@@ -1,6 +1,6 @@
-from sqlalchemy import String, Boolean, DateTime
+from sqlalchemy import String, Boolean, DateTime, ForeignKey
 from sqlalchemy import Enum as SqlEnum
-from sqlalchemy.orm import Mapped, mapped_column, declarative_base, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List, TYPE_CHECKING
 import uuid
 from datetime import datetime
@@ -9,11 +9,15 @@ from ..db import Base
 
 if TYPE_CHECKING:
     from .todo import Todo
+    from .organization import Organization
 
 
 class UserRole(Enum):
-    user = "user"
+    superuser = "superuser"
+    organization_owner = "organization_owner"
     admin = "admin"
+    team_lead = "team_lead"
+    user = "user"
 
 
 class User(Base):
@@ -35,11 +39,14 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     role: Mapped[str] = mapped_column(SqlEnum(UserRole), default=UserRole.user)
 
+    organization_id: Mapped[str] = mapped_column(String(36), ForeignKey("organizations.org_id"))
+    organization: Mapped["Organization"] = relationship("Organization", back_populates="users")
+
     todos: Mapped[List["Todo"]] = relationship(
         "Todo", back_populates="owner", cascade="all, delete-orphan"
     )
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        if 'display_name' not in kwargs and 'username' in kwargs:
-            self.display_name = kwargs['username']
+        if "display_name" not in kwargs and "username" in kwargs:
+            self.display_name = kwargs["username"]

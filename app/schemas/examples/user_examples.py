@@ -9,6 +9,7 @@ user_read_example:Dict [str, Any] = {
     "first_name": "John",
     "last_name": "Doe",
     "email": "john.doe@example.com",
+    "organization": "Tech Innovators",
     "username": "john_doe123",
     "is_active": True,
     "created_at": "2025-10-24T12:00:00",
