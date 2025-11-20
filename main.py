@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from app import models
 from app.db import engine
-from app.api.v1 import auth_router, admin_router, todo_router, user_router
+from app.api.v1 import auth_router, admin_router, todo_router, user_router, organization_router
 
 app = FastAPI()
 
@@ -11,3 +11,4 @@ app.include_router(auth_router.router)
 app.include_router(user_router.router)
 app.include_router(admin_router.router)
 app.include_router(todo_router.router)
+app.include_router(organization_router.router)

@@ -26,7 +26,7 @@ class Organization(Base):
     )
     org_name: Mapped[str] = mapped_column(String, nullable=False)
     org_email: Mapped[str] = mapped_column(String, unique=True, index=True)
-    org_display_name: Mapped[str] = mapped_column(String, index=True)
+    org_display_name: Mapped[str] = mapped_column(String, index=True, nullable=True)
     org_owner_id: Mapped[str] = mapped_column(String(36))
     org_type: Mapped[str] = mapped_column(SqlEnum(OrganizationType), default=OrganizationType.for_profit)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)

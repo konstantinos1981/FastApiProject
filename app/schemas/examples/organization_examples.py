@@ -20,11 +20,11 @@ organization_create_example: Dict[str, Any] = {
     "org_name": "Tech Innovators",
     "org_email": "contact@techinnovators.com",
     "org_type": "for_profit",
+    "org_display_name": "Tech Innovators",
 }
 
 
 organization_update_example: Dict[str, Any] = {
     "org_name": "Tech Innovators Ltd.",
-    "org_owner_id": "550e8400-e29b-41d4-a716-446655440000",
-    "org_email": "contact@techinnovators.com",  
+    "org_email": "contact@techinnovators.com",
 }
